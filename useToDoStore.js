@@ -21,7 +21,7 @@ export const useTodoStore = create((set, get) => ({
           Authorization: `Bearer ${token}`, // Include the token in the request header
         },
       });
-      console.log("response", response);
+    //   console.log("response", response);
       set({ tasks: response.data.reverse() }); // Reverse the order of tasks
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -77,15 +77,29 @@ export const useTodoStore = create((set, get) => ({
     }
   },
   deleteTask: async (taskId) => {
+    const { token } = get(); // Get the token from the Zustand store
+    console.log("token", taskId)
+    
     try {
-      await axios.delete(`${API_URL}/tasks/${taskId}`);
-      set((state) => ({
-        tasks: state.tasks.filter((task) => task._id !== taskId),
-      }));
+      const response = await axios.delete(`${API_URL}/tasks/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+        },
+      });
+  
+      // Check if the response indicates successful deletion
+      if (response.status === 200) {
+        set((state) => ({
+          tasks: state.tasks.filter((task) => task._id !== taskId), // Update the state to remove the deleted task
+        }));
+        console.log('Task deleted successfully');
+      }
     } catch (error) {
       console.error('Error deleting task:', error);
+      // Optionally handle error (e.g., show a notification)
     }
   },
+  
 
   login: async (username, password) => {
     console.log("hey", username, password);
